@@ -39,17 +39,23 @@ def get_projects_statistics_results() -> list:
         return []
 
 
-def get_zero_bets_wins_dates_results() -> list:
+def get_zero_bets_wins_dates_results(project: dict | None = None) -> list:
     dates = []
 
     try:
         start = datetime.strptime(coll_date_from, "%Y-%m-%d").date()
         end = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
 
+        params = [start, end]
         query = (
             f"SELECT {projects_statistics_date} AS date "
             f"FROM {table_name} "
             f"WHERE {projects_statistics_date} BETWEEN %s AND %s "
+        )
+        if project is not None and "id" in project:
+            query += f"AND {projects_statistics_project_id} = %s "
+            params.append(project["id"])
+        query += (
             f"GROUP BY {projects_statistics_date} "
             f"HAVING COALESCE(SUM({projects_statistics_bets}), 0) = 0 "
             f"AND COALESCE(SUM({projects_statistics_wins}), 0) = 0"
@@ -57,7 +63,7 @@ def get_zero_bets_wins_dates_results() -> list:
 
         conn = open_coll_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute(query, (start, end))
+        cursor.execute(query, tuple(params))
         dates = cursor.fetchall()
         set_log(f"Fetched {len(dates)} dates with zero bets and wins", reason="Info", method="get_zero_bets_wins_dates_results")
 
@@ -70,17 +76,23 @@ def get_zero_bets_wins_dates_results() -> list:
         return []
 
 
-def get_zero_payments_payouts_dates_results() -> list:
+def get_zero_payments_payouts_dates_results(project: dict | None = None) -> list:
     dates = []
 
     try:
         start = datetime.strptime(coll_date_from, "%Y-%m-%d").date()
         end = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
 
+        params = [start, end]
         query = (
             f"SELECT {projects_statistics_date} AS date "
             f"FROM {table_name} "
             f"WHERE {projects_statistics_date} BETWEEN %s AND %s "
+        )
+        if project is not None and "id" in project:
+            query += f"AND {projects_statistics_project_id} = %s "
+            params.append(project["id"])
+        query += (
             f"GROUP BY {projects_statistics_date} "
             f"HAVING COALESCE(SUM({projects_statistics_payments}), 0) = 0 "
             f"AND COALESCE(SUM({projects_statistics_payouts}), 0) = 0"
@@ -88,7 +100,7 @@ def get_zero_payments_payouts_dates_results() -> list:
 
         conn = open_coll_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute(query, (start, end))
+        cursor.execute(query, tuple(params))
         dates = cursor.fetchall()
         set_log(f"Fetched {len(dates)} dates with zero payments and payouts", reason="Info", method="get_zero_payments_payouts_dates_results")
 
@@ -101,24 +113,30 @@ def get_zero_payments_payouts_dates_results() -> list:
         return []
 
 
-def get_zero_cpas_dates_results() -> list:
+def get_zero_cpas_dates_results(project: dict | None = None) -> list:
     dates = []
 
     try:
         start = datetime.strptime(coll_date_from, "%Y-%m-%d").date()
         end = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
 
+        params = [start, end]
         query = (
             f"SELECT {projects_statistics_date} AS date "
             f"FROM {table_name} "
             f"WHERE {projects_statistics_date} BETWEEN %s AND %s "
+        )
+        if project is not None and "id" in project:
+            query += f"AND {projects_statistics_project_id} = %s "
+            params.append(project["id"])
+        query += (
             f"GROUP BY {projects_statistics_date} "
             f"HAVING COALESCE(SUM({projects_statistics_cpa_amount}), 0) = 0"
         )
 
         conn = open_coll_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute(query, (start, end))
+        cursor.execute(query, tuple(params))
         dates = cursor.fetchall()
         set_log(f"Fetched {len(dates)} dates with zero CPA amounts", reason="Info", method="get_zero_cpas_dates_results")
 
@@ -131,23 +149,27 @@ def get_zero_cpas_dates_results() -> list:
         return []
 
 
-def get_missing_dates_results() -> list:
+def get_missing_dates_results(project: dict | None = None) -> list:
     dates = []
 
     try:
         start = datetime.strptime(coll_date_from, "%Y-%m-%d").date()
         end = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
 
+        params = [start, end]
         query = (
             f"SELECT DISTINCT {projects_statistics_date} AS date "
             f"FROM {table_name} "
             f"WHERE {projects_statistics_date} BETWEEN %s AND %s "
-            f"ORDER BY {projects_statistics_date}"
         )
+        if project is not None and "id" in project:
+            query += f"AND {projects_statistics_project_id} = %s "
+            params.append(project["id"])
+        query += f"ORDER BY {projects_statistics_date}"
 
         conn = open_coll_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute(query, (start, end))
+        cursor.execute(query, tuple(params))
         present_rows = cursor.fetchall()
         set_log(f"Fetched {len(present_rows)} present dates in range", reason="Info", method="get_missing_dates_results")
 

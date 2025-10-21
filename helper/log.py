@@ -1,22 +1,21 @@
 import os
-import sys
 from datetime import datetime
-from configs.globals import environment, log_dir, project_name
+import configs.globals as cfg
 from helper.validate import create_dir_if_not_exists, create_file_if_not_exists
 
 
 def format_log(message: str, reason: str = "", method: str = ""):
     date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    return f"{date_time} | Project: {project_name} | Method: {method} | {reason}: {message}"
+    return f"{date_time} | Project: {cfg.project_name} | Method: {method} | {reason}: {message}"
 
 def set_log(message: str, reason: str = "", method: str = "", send_telegram: bool = False):
-    create_dir_if_not_exists(log_dir)
-    create_file_if_not_exists(log_dir, "globals.log")
+    create_dir_if_not_exists(cfg.log_dir)
+    create_file_if_not_exists(cfg.log_dir, "globals.log")
 
-    log_file = os.path.join(log_dir, "globals.log")
+    log_file = os.path.join(cfg.log_dir, "globals.log")
     formatted_message = format_log(message, reason, method)
 
-    if environment == "local":
+    if cfg.environment == "local":
         print(f"{formatted_message}")
 
     if method:
