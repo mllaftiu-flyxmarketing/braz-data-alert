@@ -2,6 +2,10 @@ import requests
 from typing import Optional
 from datetime import datetime
 from configs.globals import (
+    coll_date_from,
+    coll_date_since,
+)
+from configs.globals import (
     telegram_send_general_message_url,
     telegram_send_topic_message_url,
     telegram_chat_id,
@@ -25,11 +29,17 @@ def _truncate_message(msg: str) -> str:
 
 def format_topic_message(message: str, reason: str, method: str) -> str:
     date_str = datetime.now().strftime("%Y-%m-%d")
+    reasoning = method.replace("_", " ").title()
+    reasoning = reasoning.replace("Get", "Found").title()
+    message = message.replace("; ", "\n")
+    
     header = (
-        f"🗄 Project:\n{project_name}\n\n"
-        f"⏱️ Run at:\n{date_str}\n\n"
-        f"🎯 Method:\n{method}\n\n"
-        f"📌 {reason}: {message}"
+        f"📅 **Date Range**\n{coll_date_from} - {coll_date_since}\n\n"
+        f"🗄 **Project**\n{project_name}\n\n"
+        f"⏱️ **Run at**\n{date_str}\n\n"
+        f"📝 **Description**\n{reasoning}\n\n"
+        f"🎯 **Method**\n{method}\n\n"
+        f"📌 **{reason}**{message}"
     )
     return header
 
