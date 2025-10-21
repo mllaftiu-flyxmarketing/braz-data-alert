@@ -39,7 +39,7 @@ def get_projects_statistics_results() -> list:
         return []
 
 
-def get_zero_bets_wins_dates_results(project: dict | None = None) -> list:
+def get_statistics_zero_bets_wins_dates_results(project: dict | None = None) -> list:
     dates = []
 
     try:
@@ -76,7 +76,7 @@ def get_zero_bets_wins_dates_results(project: dict | None = None) -> list:
         return []
 
 
-def get_zero_payments_payouts_dates_results(project: dict | None = None) -> list:
+def get_statistics_zero_payments_payouts_dates_results(project: dict | None = None) -> list:
     dates = []
 
     try:
@@ -113,7 +113,7 @@ def get_zero_payments_payouts_dates_results(project: dict | None = None) -> list
         return []
 
 
-def get_zero_cpas_dates_results(project: dict | None = None) -> list:
+def get_statistics_zero_cpas_dates_results(project: dict | None = None) -> list:
     dates = []
 
     try:
@@ -149,7 +149,7 @@ def get_zero_cpas_dates_results(project: dict | None = None) -> list:
         return []
 
 
-def get_missing_dates_results(project: dict | None = None) -> list:
+def get_statistics_missings_dates_results(project: dict | None = None) -> list:
     dates = []
 
     try:
@@ -248,7 +248,7 @@ def get_projects_statistics_ids_by_dates(dates: list) -> dict:
         return {}
 
 
-def get_ids_for_zero_bets_wins_dates(dates: list) -> dict:
+def get_ids_for_statistics_zero_bets_wins_dates(dates: list) -> dict:
     ids_map: Dict[str, list] = {}
     try:
         if not dates:
@@ -278,7 +278,7 @@ def get_ids_for_zero_bets_wins_dates(dates: list) -> dict:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(query, norm_dates)
         rows = cursor.fetchall()
-        set_log(f"Fetched {len(rows)} IDs for zero bets/wins tracking", reason="Info", method="get_ids_for_zero_bets_wins_dates")
+        set_log(f"Fetched {len(rows)} IDs for zero bets/wins tracking", reason="Info", method="get_ids_for_statistics_zero_bets_wins_dates")
 
         cursor.close()
         close_coll_connection(conn)
@@ -295,11 +295,11 @@ def get_ids_for_zero_bets_wins_dates(dates: list) -> dict:
             ids_map.setdefault(key, []).append(row["id"])
         return ids_map
     except Exception as e:
-        set_log(str(e), reason="Error", method="get_ids_for_zero_bets_wins_dates")
+        set_log(str(e), reason="Error", method="get_ids_for_statistics_zero_bets_wins_dates")
         return {}
 
 
-def get_ids_for_zero_payments_payouts_dates(dates: list) -> dict:
+def get_ids_for_statistics_zero_payments_payouts_dates(dates: list) -> dict:
     ids_map: Dict[str, list] = {}
     try:
         if not dates:
@@ -329,7 +329,7 @@ def get_ids_for_zero_payments_payouts_dates(dates: list) -> dict:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(query, norm_dates)
         rows = cursor.fetchall()
-        set_log(f"Fetched {len(rows)} IDs for zero payments/payouts tracking", reason="Info", method="get_ids_for_zero_payments_payouts_dates")
+        set_log(f"Fetched {len(rows)} IDs for zero payments/payouts tracking", reason="Info", method="get_ids_for_statistics_zero_payments_payouts_dates")
 
         cursor.close()
         close_coll_connection(conn)
@@ -346,11 +346,11 @@ def get_ids_for_zero_payments_payouts_dates(dates: list) -> dict:
             ids_map.setdefault(key, []).append(row["id"])
         return ids_map
     except Exception as e:
-        set_log(str(e), reason="Error", method="get_ids_for_zero_payments_payouts_dates")
+        set_log(str(e), reason="Error", method="get_ids_for_statistics_zero_payments_payouts_dates")
         return {}
 
 
-def get_ids_for_zero_cpas_dates(dates: list) -> dict:
+def get_ids_for_statistics_zero_cpas_dates(dates: list) -> dict:
     ids_map: Dict[str, list] = {}
     try:
         if not dates:
@@ -379,7 +379,7 @@ def get_ids_for_zero_cpas_dates(dates: list) -> dict:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(query, norm_dates)
         rows = cursor.fetchall()
-        set_log(f"Fetched {len(rows)} IDs for zero CPA tracking", reason="Info", method="get_ids_for_zero_cpas_dates")
+        set_log(f"Fetched {len(rows)} IDs for zero CPA tracking", reason="Info", method="get_ids_for_statistics_zero_cpas_dates")
 
         cursor.close()
         close_coll_connection(conn)
@@ -396,5 +396,5 @@ def get_ids_for_zero_cpas_dates(dates: list) -> dict:
             ids_map.setdefault(key, []).append(row["id"])
         return ids_map
     except Exception as e:
-        set_log(str(e), reason="Error", method="get_ids_for_zero_cpas_dates")
+        set_log(str(e), reason="Error", method="get_ids_for_statistics_zero_cpas_dates")
         return {}

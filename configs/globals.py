@@ -25,7 +25,7 @@ class_dir = os.path.join(app_dir, "classes")
 model_dir = os.path.join(app_dir, "models")
 
 # Dates Collection
-coll_date_from = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+coll_date_from = (datetime.now() - timedelta(days=8)).strftime("%Y-%m-%d")
 coll_date_since = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 
 # Telegram Bot
@@ -35,3 +35,12 @@ telegram_topic_id = os.getenv("TELEGRAM_TOPIC_ID", "")
 telegram_topic_reply_to_message_id = os.getenv("TELEGRAM_TOPIC_REPLY_TO_MESSAGE_ID", "")
 telegram_send_general_message_url = f"https://api.telegram.org/bot{telegram_bot_token}/sendMessage"
 telegram_send_topic_message_url = f"https://api.telegram.org/bot{telegram_bot_token}/sendMessage"
+
+# Excluded methods for domains
+excluded_methods_for_domain = {
+    "get_projects_statistics_problem_dates": [
+      {
+            ".io": ["get_statistics_zero_cpas"]
+      },
+    ],
+}
