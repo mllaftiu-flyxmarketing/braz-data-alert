@@ -133,6 +133,8 @@ def get_projects_statistics_problem_dates(project: dict):
             for key, methods in items:
                 if domain == key or domain.endswith(key):
                     excluded.update(methods if isinstance(methods, list) else [])
+        if not excluded:
+            set_log("No exclusions matched; running all statistics checks", reason="Info", method="get_projects_statistics_problem_dates")
 
         methods_map = {
             "get_statistics_with_zero_bets_wins": get_statistics_with_zero_bets_wins,
