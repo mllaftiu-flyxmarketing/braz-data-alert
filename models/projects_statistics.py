@@ -15,13 +15,14 @@ projects_statistics_payments = "payments"
 projects_statistics_payouts = "payouts"
 projects_statistics_bets = "bets"
 projects_statistics_wins = "wins"
+projects_statistics_cpa_amount = "cpa_amount"
 
 
 def get_projects_statistics_results() -> list:
     projects_statistics = []
 
     try:
-        query = f"SELECT {projects_statistics_id}, {projects_statistics_date}, {projects_statistics_project_id}, {projects_statistics_customer_id}, {projects_statistics_partner_id}, {projects_statistics_promo_id}, {projects_statistics_payments}, {projects_statistics_payouts}, {projects_statistics_bets}, {projects_statistics_wins} FROM {table_name}"
+        query = f"SELECT {projects_statistics_id}, {projects_statistics_date}, {projects_statistics_project_id}, {projects_statistics_customer_id}, {projects_statistics_partner_id}, {projects_statistics_promo_id}, {projects_statistics_payments}, {projects_statistics_payouts}, {projects_statistics_bets}, {projects_statistics_wins}, {projects_statistics_cpa_amount} FROM {table_name}"
 
         conn = open_coll_connection()
         cursor = conn.cursor(dictionary=True)
@@ -100,6 +101,36 @@ def get_zero_payments_payouts_dates_results() -> list:
         return []
 
 
+def get_zero_cpas_dates_results() -> list:
+    dates = []
+
+    try:
+        start = datetime.strptime(coll_date_from, "%Y-%m-%d").date()
+        end = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
+
+        query = (
+            f"SELECT {projects_statistics_date} AS date "
+            f"FROM {table_name} "
+            f"WHERE {projects_statistics_date} BETWEEN %s AND %s "
+            f"GROUP BY {projects_statistics_date} "
+            f"HAVING COALESCE(SUM({projects_statistics_cpa_amount}), 0) = 0"
+        )
+
+        conn = open_coll_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(query, (start, end))
+        dates = cursor.fetchall()
+        set_log(f"Fetched {len(dates)} dates with zero CPA amounts", reason="Info", method="get_zero_cpas_dates_results")
+
+        cursor.close()
+        close_coll_connection(conn)
+
+        return dates
+    except Exception as e:
+        set_log(str(e), reason="Error", method="get_zero_cpas_dates_results")
+        return []
+
+
 def get_missing_dates_results() -> list:
     dates = []
 
@@ -151,7 +182,6 @@ def get_projects_statistics_ids_by_dates(dates: list) -> dict:
         if not dates:
             return ids_map
 
-        # Normalize incoming dates to strings YYYY-MM-DD for dictionary keys and SQL params
         norm_dates = []
         for d in dates:
             if isinstance(d, datetime):
@@ -295,4 +325,54 @@ def get_ids_for_zero_payments_payouts_dates(dates: list) -> dict:
         return ids_map
     except Exception as e:
         set_log(str(e), reason="Error", method="get_ids_for_zero_payments_payouts_dates")
+        return {}
+
+
+def get_ids_for_zero_cpas_dates(dates: list) -> dict:
+    ids_map: Dict[str, list] = {}
+    try:
+        if not dates:
+            return ids_map
+
+        norm_dates = []
+        for d in dates:
+            if isinstance(d, datetime):
+                norm_dates.append(d.strftime("%Y-%m-%d"))
+            elif isinstance(d, date):
+                norm_dates.append(d.strftime("%Y-%m-%d"))
+            else:
+                norm_dates.append(str(d))
+
+        placeholders = ",".join(["%s"] * len(norm_dates))
+        query = (
+            f"SELECT {projects_statistics_date} AS date, MIN({projects_statistics_id}) AS id "
+            f"FROM {table_name} "
+            f"WHERE {projects_statistics_date} IN ({placeholders}) "
+            f"AND COALESCE({projects_statistics_cpa_amount}, 0) = 0 "
+            f"GROUP BY {projects_statistics_date} "
+            f"ORDER BY {projects_statistics_date}"
+        )
+
+        conn = open_coll_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(query, norm_dates)
+        rows = cursor.fetchall()
+        set_log(f"Fetched {len(rows)} IDs for zero CPA tracking", reason="Info", method="get_ids_for_zero_cpas_dates")
+
+        cursor.close()
+        close_coll_connection(conn)
+
+        for raw in rows:
+            row = cast(Dict[str, Any], raw)
+            d = row["date"]
+            if isinstance(d, datetime):
+                key = d.strftime("%Y-%m-%d")
+            elif isinstance(d, date):
+                key = d.strftime("%Y-%m-%d")
+            else:
+                key = str(d)
+            ids_map.setdefault(key, []).append(row["id"])
+        return ids_map
+    except Exception as e:
+        set_log(str(e), reason="Error", method="get_ids_for_zero_cpas_dates")
         return {}
