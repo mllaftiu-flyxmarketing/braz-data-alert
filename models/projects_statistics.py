@@ -39,7 +39,7 @@ def get_projects_statistics_results() -> list:
         return []
 
 
-def get_statistics_zero_bets_wins_dates_results(project: dict | None = None) -> list:
+def get_statistics_with_zero_bets_wins_dates_results(project: dict) -> list:
     dates = []
 
     try:
@@ -76,7 +76,7 @@ def get_statistics_zero_bets_wins_dates_results(project: dict | None = None) -> 
         return []
 
 
-def get_statistics_zero_payments_payouts_dates_results(project: dict | None = None) -> list:
+def get_statistics_with_zero_payments_payouts_dates_results(project: dict) -> list:
     dates = []
 
     try:
@@ -113,7 +113,7 @@ def get_statistics_zero_payments_payouts_dates_results(project: dict | None = No
         return []
 
 
-def get_statistics_zero_cpas_dates_results(project: dict | None = None) -> list:
+def get_statistics_with_zero_cpas_dates_results(project: dict) -> list:
     dates = []
 
     try:
@@ -149,7 +149,7 @@ def get_statistics_zero_cpas_dates_results(project: dict | None = None) -> list:
         return []
 
 
-def get_statistics_missings_dates_results(project: dict | None = None) -> list:
+def get_statistics_with_missings_dates_results(project: dict) -> list:
     dates = []
 
     try:

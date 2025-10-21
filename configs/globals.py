@@ -40,7 +40,7 @@ telegram_send_topic_message_url = f"https://api.telegram.org/bot{telegram_bot_to
 excluded_methods_for_domain = {
     "get_projects_statistics_problem_dates": [
       {
-            ".io": ["get_statistics_zero_cpas"]
+            ".io": ["get_statistics_with_zero_cpas"]
       },
     ],
 }
