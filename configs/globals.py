@@ -26,7 +26,7 @@ model_dir = os.path.join(app_dir, "models")
 
 # Dates Collection
 coll_date_from = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
-coll_date_since = datetime.now().strftime("%Y-%m-%d")
+coll_date_since = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 
 # Telegram Bot
 telegram_bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
