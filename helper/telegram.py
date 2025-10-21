@@ -1,5 +1,6 @@
 import requests
 from typing import Optional
+from datetime import datetime
 from configs.globals import (
     telegram_send_general_message_url,
     telegram_send_topic_message_url,
@@ -9,12 +10,37 @@ from configs.globals import (
     project_name,
 )
 
+MAX_TELEGRAM_MESSAGE_LENGTH = 3900
+
+
+def _truncate_message(msg: str) -> str:
+    if not isinstance(msg, str):
+        msg = str(msg)
+    if len(msg) <= MAX_TELEGRAM_MESSAGE_LENGTH:
+        return msg
+    keep = MAX_TELEGRAM_MESSAGE_LENGTH - 50
+    suffix = f"... (truncated {len(msg) - keep} chars)"
+    return msg[:keep] + suffix
+
+
+def format_topic_message(message: str, reason: str, method: str) -> str:
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    header = (
+        f"🗄 Project:\n{project_name}\n\n"
+        f"⏱️ Run at:\n{date_str}\n\n"
+        f"🎯 Method:\n{method}\n\n"
+        f"📌 {reason}: {message}"
+    )
+    return header
+
+
 def set_telegram_general_message(message: str, chat_id: Optional[str] = None, thread_id: Optional[str] = None):
     try:
         target_chat_id = chat_id if chat_id else telegram_chat_id
         payload = {
             "chat_id": target_chat_id,
-            "text": message,
+            "text": _truncate_message(message),
+            "parse_mode": "HTML",
         }
 
         response = requests.post(telegram_send_general_message_url, data=payload, timeout=15)
@@ -44,18 +70,17 @@ def set_telegram_topic_message(
         target_chat_id = chat_id if chat_id else telegram_chat_id
         payload = {
             "chat_id": target_chat_id,
-            "text": message,
+            "text": _truncate_message(message),
+            "parse_mode": "HTML",
         }
 
-        # Prefer reply_to_message_id (reply to the topic root message) if provided
-        use_reply_id = reply_to_message_id if reply_to_message_id is not None else telegram_topic_reply_to_message_id
-        if use_reply_id and str(use_reply_id).strip() != "":
-            payload["reply_to_message_id"] = str(use_reply_id)
+        use_thread_id = thread_id if thread_id is not None else telegram_topic_id
+        if use_thread_id and str(use_thread_id).strip() != "":
+            payload["message_thread_id"] = str(use_thread_id)
         else:
-            # Fallback to message_thread_id when no reply id is provided
-            use_thread_id = thread_id if thread_id is not None else telegram_topic_id
-            if use_thread_id and str(use_thread_id).strip() != "":
-                payload["message_thread_id"] = str(use_thread_id)
+            use_reply_id = reply_to_message_id if reply_to_message_id is not None else telegram_topic_reply_to_message_id
+            if use_reply_id and str(use_reply_id).strip() != "":
+                payload["reply_to_message_id"] = str(use_reply_id)
 
         headers = {"Content-Type": "application/json"}
         response = requests.post(

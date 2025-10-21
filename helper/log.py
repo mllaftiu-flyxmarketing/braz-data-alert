@@ -24,5 +24,6 @@ def set_log(message: str, reason: str = "", method: str = "", send_telegram: boo
             f.write(f"{formatted_message}\n")
     
     if send_telegram or reason in ("Error", "Warning"):
-        from helper.telegram import set_telegram_topic_message
-        set_telegram_topic_message(formatted_message)
+        from helper.telegram import set_telegram_topic_message, format_topic_message
+        topic_text = format_topic_message(message, reason, method)
+        set_telegram_topic_message(topic_text)

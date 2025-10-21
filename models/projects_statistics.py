@@ -27,6 +27,7 @@ def get_projects_statistics_results() -> list:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(query)
         projects_statistics = cursor.fetchall()
+        set_log(f"Fetched {len(projects_statistics)} rows", reason="Info", method="get_projects_statistics_results")
 
         cursor.close()
         close_coll_connection(conn)
@@ -57,6 +58,7 @@ def get_zero_bets_wins_dates_results() -> list:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(query, (start, end))
         dates = cursor.fetchall()
+        set_log(f"Fetched {len(dates)} dates with zero bets and wins", reason="Info", method="get_zero_bets_wins_dates_results")
 
         cursor.close()
         close_coll_connection(conn)
@@ -87,6 +89,7 @@ def get_zero_payments_payouts_dates_results() -> list:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(query, (start, end))
         dates = cursor.fetchall()
+        set_log(f"Fetched {len(dates)} dates with zero payments and payouts", reason="Info", method="get_zero_payments_payouts_dates_results")
 
         cursor.close()
         close_coll_connection(conn)
@@ -115,6 +118,7 @@ def get_missing_dates_results() -> list:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(query, (start, end))
         present_rows = cursor.fetchall()
+        set_log(f"Fetched {len(present_rows)} present dates in range", reason="Info", method="get_missing_dates_results")
 
         cursor.close()
         close_coll_connection(conn)
@@ -139,3 +143,156 @@ def get_missing_dates_results() -> list:
     except Exception as e:
         set_log(str(e), reason="Error", method="get_missing_dates_results")
         return []
+
+
+def get_projects_statistics_ids_by_dates(dates: list) -> dict:
+    ids_map: Dict[str, list] = {}
+    try:
+        if not dates:
+            return ids_map
+
+        # Normalize incoming dates to strings YYYY-MM-DD for dictionary keys and SQL params
+        norm_dates = []
+        for d in dates:
+            if isinstance(d, datetime):
+                norm_dates.append(d.strftime("%Y-%m-%d"))
+            elif isinstance(d, date):
+                norm_dates.append(d.strftime("%Y-%m-%d"))
+            else:
+                norm_dates.append(str(d))
+
+        placeholders = ",".join(["%s"] * len(norm_dates))
+        query = (
+            f"SELECT {projects_statistics_date} AS date, MIN({projects_statistics_id}) AS id "
+            f"FROM {table_name} "
+            f"WHERE {projects_statistics_date} IN ({placeholders}) "
+            f"GROUP BY {projects_statistics_date} "
+            f"ORDER BY {projects_statistics_date}"
+        )
+
+        conn = open_coll_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(query, norm_dates)
+        rows = cursor.fetchall()
+        set_log(f"Fetched {len(rows)} IDs for tracking", reason="Info", method="get_projects_statistics_ids_by_dates")
+
+        cursor.close()
+        close_coll_connection(conn)
+
+        for raw in rows:
+            row = cast(Dict[str, Any], raw)
+            d = row["date"]
+            if isinstance(d, datetime):
+                key = d.strftime("%Y-%m-%d")
+            elif isinstance(d, date):
+                key = d.strftime("%Y-%m-%d")
+            else:
+                key = str(d)
+            ids_map.setdefault(key, []).append(row["id"])
+
+        return ids_map
+    except Exception as e:
+        set_log(str(e), reason="Error", method="get_projects_statistics_ids_by_dates")
+        return {}
+
+
+def get_ids_for_zero_bets_wins_dates(dates: list) -> dict:
+    ids_map: Dict[str, list] = {}
+    try:
+        if not dates:
+            return ids_map
+
+        norm_dates = []
+        for d in dates:
+            if isinstance(d, datetime):
+                norm_dates.append(d.strftime("%Y-%m-%d"))
+            elif isinstance(d, date):
+                norm_dates.append(d.strftime("%Y-%m-%d"))
+            else:
+                norm_dates.append(str(d))
+
+        placeholders = ",".join(["%s"] * len(norm_dates))
+        query = (
+            f"SELECT {projects_statistics_date} AS date, MIN({projects_statistics_id}) AS id "
+            f"FROM {table_name} "
+            f"WHERE {projects_statistics_date} IN ({placeholders}) "
+            f"AND COALESCE({projects_statistics_bets}, 0) = 0 "
+            f"AND COALESCE({projects_statistics_wins}, 0) = 0 "
+            f"GROUP BY {projects_statistics_date} "
+            f"ORDER BY {projects_statistics_date}"
+        )
+
+        conn = open_coll_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(query, norm_dates)
+        rows = cursor.fetchall()
+        set_log(f"Fetched {len(rows)} IDs for zero bets/wins tracking", reason="Info", method="get_ids_for_zero_bets_wins_dates")
+
+        cursor.close()
+        close_coll_connection(conn)
+
+        for raw in rows:
+            row = cast(Dict[str, Any], raw)
+            d = row["date"]
+            if isinstance(d, datetime):
+                key = d.strftime("%Y-%m-%d")
+            elif isinstance(d, date):
+                key = d.strftime("%Y-%m-%d")
+            else:
+                key = str(d)
+            ids_map.setdefault(key, []).append(row["id"])
+        return ids_map
+    except Exception as e:
+        set_log(str(e), reason="Error", method="get_ids_for_zero_bets_wins_dates")
+        return {}
+
+
+def get_ids_for_zero_payments_payouts_dates(dates: list) -> dict:
+    ids_map: Dict[str, list] = {}
+    try:
+        if not dates:
+            return ids_map
+
+        norm_dates = []
+        for d in dates:
+            if isinstance(d, datetime):
+                norm_dates.append(d.strftime("%Y-%m-%d"))
+            elif isinstance(d, date):
+                norm_dates.append(d.strftime("%Y-%m-%d"))
+            else:
+                norm_dates.append(str(d))
+
+        placeholders = ",".join(["%s"] * len(norm_dates))
+        query = (
+            f"SELECT {projects_statistics_date} AS date, MIN({projects_statistics_id}) AS id "
+            f"FROM {table_name} "
+            f"WHERE {projects_statistics_date} IN ({placeholders}) "
+            f"AND COALESCE({projects_statistics_payments}, 0) = 0 "
+            f"AND COALESCE({projects_statistics_payouts}, 0) = 0 "
+            f"GROUP BY {projects_statistics_date} "
+            f"ORDER BY {projects_statistics_date}"
+        )
+
+        conn = open_coll_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(query, norm_dates)
+        rows = cursor.fetchall()
+        set_log(f"Fetched {len(rows)} IDs for zero payments/payouts tracking", reason="Info", method="get_ids_for_zero_payments_payouts_dates")
+
+        cursor.close()
+        close_coll_connection(conn)
+
+        for raw in rows:
+            row = cast(Dict[str, Any], raw)
+            d = row["date"]
+            if isinstance(d, datetime):
+                key = d.strftime("%Y-%m-%d")
+            elif isinstance(d, date):
+                key = d.strftime("%Y-%m-%d")
+            else:
+                key = str(d)
+            ids_map.setdefault(key, []).append(row["id"])
+        return ids_map
+    except Exception as e:
+        set_log(str(e), reason="Error", method="get_ids_for_zero_payments_payouts_dates")
+        return {}
