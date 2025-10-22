@@ -1,7 +1,7 @@
 from helper.log import set_log
 from typing import Dict, Any, cast
 from datetime import datetime, date, timedelta
-from configs.globals import coll_date_from, coll_date_since
+from configs.globals import coll_date_since, coll_date_up_to
 from helper.database import open_coll_connection, close_coll_connection
 
 table_prefix = "project"
@@ -15,8 +15,8 @@ def get_sessions_with_zero_bets_wins_dates_results(table_name: str) -> list:
     dates = []
 
     try:
-        start = datetime.strptime(coll_date_from, "%Y-%m-%d").date()
-        end = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
+        start = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
+        end = datetime.strptime(coll_date_up_to, "%Y-%m-%d").date()
 
         params = [start, end]
         query = (
@@ -100,8 +100,8 @@ def get_ids_for_statistics_with_zero_bets_wins_dates(table_name: str, dates: lis
 def get_sessions_missing_dates_results(table_name: str) -> list:
     dates = []
     try:
-        start = datetime.strptime(coll_date_from, "%Y-%m-%d").date()
-        end = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
+        start = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
+        end = datetime.strptime(coll_date_up_to, "%Y-%m-%d").date()
 
         query = (
             f"SELECT DISTINCT {projects_sessions_date} AS date "

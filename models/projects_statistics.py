@@ -1,6 +1,6 @@
 from helper.database import open_coll_connection, close_coll_connection
 from helper.log import set_log
-from configs.globals import coll_date_from, coll_date_since
+from configs.globals import coll_date_since, coll_date_up_to
 from datetime import datetime, timedelta, date
 from typing import cast, Dict, Any
 
@@ -43,8 +43,8 @@ def get_statistics_with_zero_bets_wins_dates_results(project: dict) -> list:
     dates = []
 
     try:
-        start = datetime.strptime(coll_date_from, "%Y-%m-%d").date()
-        end = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
+        start = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
+        end = datetime.strptime(coll_date_up_to, "%Y-%m-%d").date()
 
         params = [start, end]
         query = (
@@ -80,8 +80,8 @@ def get_statistics_with_zero_payments_payouts_dates_results(project: dict) -> li
     dates = []
 
     try:
-        start = datetime.strptime(coll_date_from, "%Y-%m-%d").date()
-        end = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
+        start = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
+        end = datetime.strptime(coll_date_up_to, "%Y-%m-%d").date()
 
         params = [start, end]
         query = (
@@ -117,8 +117,8 @@ def get_statistics_with_zero_cpas_dates_results(project: dict) -> list:
     dates = []
 
     try:
-        start = datetime.strptime(coll_date_from, "%Y-%m-%d").date()
-        end = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
+        start = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
+        end = datetime.strptime(coll_date_up_to, "%Y-%m-%d").date()
 
         params = [start, end]
         query = (
@@ -153,8 +153,8 @@ def get_statistics_with_missings_dates_results(project: dict) -> list:
     dates = []
 
     try:
-        start = datetime.strptime(coll_date_from, "%Y-%m-%d").date()
-        end = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
+        start = datetime.strptime(coll_date_since, "%Y-%m-%d").date()
+        end = datetime.strptime(coll_date_up_to, "%Y-%m-%d").date()
 
         params = [start, end]
         query = (

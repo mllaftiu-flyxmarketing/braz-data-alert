@@ -23,7 +23,7 @@ def format_topic_message(message: str, reason: str, method: str) -> str:
     message = message.replace("; ", "\n")
     
     header = (
-        f"📅 Date Range\n{cfg.coll_date_from} - {cfg.coll_date_since}\n\n"
+        f"📅 Date Range\n{cfg.coll_date_since} - {cfg.coll_date_up_to}\n\n"
         f"🗄 Project\n{cfg.project_name}\n\n"
         f"⏱️ Run at\n{date_str}\n\n"
         f"📝 Description\n{reasoning}\n\n"
